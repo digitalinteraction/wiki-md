@@ -24,20 +24,20 @@ const plugin = require('./plugins')
 async function renderSass(inputFile, primary, primaryInvert) {
   let contents = await readFile(inputFile, 'utf8')
   let variables = `$primary: ${primary}\n$primary-invert: ${primaryInvert}\n`
-  
+
   const options = {
     data: variables + contents,
     indentedSyntax: true,
     includePaths: [join(__dirname, '../node_modules')],
     outputStyle: 'compressed'
   }
-  
+
   return promisify(Sass.render)(options)
 }
 
 async function generate(argv) {
   // let start = argv.indir === '.' ? '' : argv.indir
-  
+
   const {
     indexFile,
     themeColor,
@@ -45,54 +45,61 @@ async function generate(argv) {
     indir,
     outdir,
     siteTitle,
-    basePath,
+    basePath
     // ownerName,
     // ownerLink,
     // compress
   } = argv
-  
+
   const infile = file => join(process.cwd(), indir, file)
   const outfile = file => join(process.cwd(), outdir, file)
-  
+
   let matches = await glob(`**/*.md`, {
     cwd: infile('.'),
     ignore: ['**/node_modules/**', `**/${outdir}/**`]
   })
-  
+
   let sass = await renderSass(
     join(__dirname, 'theme.sass'),
     themeColor,
     themeInvert
   )
-  
+
+  await writeFile(outfile('theme.css'), sass.css)
+
   await writeFile(
-    outfile('theme.css'),
-    sass.css
+    outfile('logic.js'),
+    await readFile(join(__dirname, 'logic.js'))
   )
-  
+
   let files = []
   let indexPageRegex = new RegExp(`${indexFile}\\.md`)
   let allOutDirs = new Set()
-  
-  await Promise.all(matches.map(async match => {
-    let data = await readFile(infile(match), 'utf8')
-    
-    let targetFile = match
-      .replace(indexPageRegex, 'index.md')
-      .replace(/\.md$/, '.html')
-    
-    files.push({
-      inputFile: match,
-      outFile: targetFile,
-      ...matter(data)
+
+  await Promise.all(
+    matches.map(async match => {
+      let data = await readFile(infile(match), 'utf8')
+
+      let targetFile = match
+        .replace(/^\d+-/, '')
+        .replace(indexPageRegex, 'index.md')
+        .replace(/\.md$/, '.html')
+
+      files.push({
+        inputFile: match,
+        outFile: targetFile,
+        ...matter(data)
+      })
+
+      allOutDirs.add(outfile(dirname(match)))
     })
-    
-    allOutDirs.add(outfile(dirname(match)))
-  }))
-  
+  )
+
+  // console.log(files.map(f => f.isEmpty !== false))
+
   // Filter out empty files
-  files = files.filter(file => !file.isEmpty)
-  
+  // files = files.filter(file => file.isEmpty === false)
+
   const markdownProcessor = unified()
     .use(parseMarkdown)
     .use(mdToHtml)
@@ -100,40 +107,38 @@ async function generate(argv) {
     .use(wrapInHtmlDoc, {
       title: siteTitle,
       css: [join(basePath, 'theme.css')],
+      js: [join(basePath, 'logic.js')],
       link: [{ rel: 'icon', href: join(basePath, 'favicon.png') }]
     })
     .use(plugin.updateDocumentTitle, { ...argv })
     .use(plugin.addBaseTag, { ...argv })
     .use(plugin.identifyTitles)
     .use(toHtmlString)
-  
-  await Promise.all(files.map(async file => {
-    let result = await markdownProcessor.process({
-      ...file,
-      contents: file.content
+
+  await Promise.all(
+    files.map(async file => {
+      let result = await markdownProcessor.process({
+        ...file,
+        contents: file.content
+      })
+
+      file.html = result
     })
-    
-    file.html = result
-  }))
-  
-  await Promise.all(Array.from(allOutDirs).map(
-    directory => mkdir(directory, { recursive: true })
-  ))
-  
-  await Promise.all(files.map(
-    file => writeFile(outfile(file.outFile), file.html)
-  ))
-  
-  // for (let file of files) {
-  //   let dir = 
-  //   await mkdir(dir, { recursive: true })
-  // }
-  
-  // console.log(files)
+  )
+
+  await Promise.all(
+    Array.from(allOutDirs).map(directory =>
+      mkdir(directory, { recursive: true })
+    )
+  )
+
+  await Promise.all(
+    files.map(file => writeFile(outfile(file.outFile), file.html))
+  )
 }
 
-
-yargs.help('h')
+yargs
+  .help('h')
   .alias('h', 'help')
   .option('site-title', {
     describe: 'The title of the site, used in the <title> elment',
@@ -170,17 +175,18 @@ yargs.help('h')
   .command(
     '$0 [indir] [outdir]',
     'asdasdas',
-    yargs => yargs
-      .positional('indir', {
-        type: 'string',
-        default: '.',
-        describe: 'Where to recursively look for markdown files'
-      })
-      .positional('outdir', {
-        type: 'string',
-        default: 'dist',
-        describe: 'Where to put the generated html'
-      }),
+    yargs =>
+      yargs
+        .positional('indir', {
+          type: 'string',
+          default: '.',
+          describe: 'Where to recursively look for markdown files'
+        })
+        .positional('outdir', {
+          type: 'string',
+          default: 'dist',
+          describe: 'Where to put the generated html'
+        }),
     async argv => {
       try {
         await generate(argv)

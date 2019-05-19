@@ -1,11 +1,23 @@
 $body-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Noto Sans,Ubuntu,Droid Sans,Helvetica Neue,sans-serif
 $title-weight: 900
 
+$menu-item-active-background-color: #1EA2AD
+$menu-nested-list-padding-left: 0.25em
+
 @import "bulma/bulma.sass"
 
 // Seems buggy?
 // html
 //   scroll-behavior: smooth
+
+=sticky-sidebar
+  +tablet
+    position: sticky
+    top: 3rem
+    align-self: flex-start
+  &:not(.is-active)
+    +mobile
+      display: none
 
 body
   display: flex
@@ -21,29 +33,41 @@ body
     flex: 1
   
   .page-wrapper
-    display: flex
+    +tablet
+      display: flex
   
   .sitetree
+    +sticky-sidebar
     flex: 0 0 220px
+    margin-right: 1em
+  
+  .menu-list li ul
+    margin-left: 0.25em
   
   .pagetree
-    position: sticky
-    top: 3rem
+    +sticky-sidebar
     flex: 0 0 220px
-    margin-left: 1em
+    margin-left: 0.5em
+    padding-left: 0.5em
     border-left: 2px dashed $border
-    padding-left: 1em
-    align-self: flex-start
+    
     li
       list-style: none
+      margin: 0
       font-weight: bold
+      a
+        display: block
+        padding: .25em .25em
       @for $i from 2 through 6
         &.level-#{$i}
           margin-left: ($i - 2) * 1em
       a
         color: $grey-darker
         &:hover
-          text-decoration: underline
+          background-color: $background
+
+  .modal .box
+    margin: 0 1em
 
   .footer
     padding: 3rem 1rem 2rem

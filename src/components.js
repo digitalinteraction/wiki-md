@@ -1,54 +1,54 @@
 const h = require('hastscript')
 const casex = require('casex')
-const { findAllHastnodes, handlify, textValue, VNode } = require('./utils')
+const {
+  findAllHastnodes,
+  handlify,
+  textValue,
+  VNode,
+  namePage
+} = require('./utils')
 
 // ...
 
 const headerTags = ['h2', 'h3', 'h4', 'h5', 'h6']
 
-exports.sitetree = function(files) {
-  
-  let root = new VNode('')
-  
-  // console.log(files)
-  
+exports.sitetree = function(currentFile, files) {
+  let root = new VNode('pages')
+
   for (let file of files) {
-    root.addChild(new VNode(file.outFile, {
-      href: file.outFile
-    }))
+    root.addChild(
+      new VNode(file.outFile, {
+        title: namePage(file),
+        href: file.outFile,
+        activeClass:
+          file.inputFile === currentFile.inputFile ? '.is-active' : ''
+      })
+    )
   }
-  
-  let list = h('nav.sitetree.menu')
-  
-  root.map(list, (node, previous) => {
-    let elem
-  
+
+  let menu = root.map((node, childResults) => {
     if (node.value) {
-      let { href, title } = node.value
-      elem = h('li', h('a', { href }, title || href))
+      let { href, title, activeClass } = node.value
+      return h('li', [h(`a${activeClass}`, { href }, title || href)])
     } else {
-      previous.children.push(
-        h('p.menu-label', casex(node.name, 'Ca Se'))
-      )
-      elem = h('ul.menu-list')
+      return h('li', [
+        h('p.menu-label', casex(node.name, 'Ca Se')),
+        h('ul.menu-list', childResults)
+      ])
     }
-    
-    previous.children.push(elem)
-  
-    return elem
   })
-  
-  return list
+
+  return h('nav.sitetree.menu', menu.children)
 }
 
 exports.pagetree = function(node, file) {
   let headingElems = findAllHastnodes(node, n => headerTags.includes(n.tagName))
 
   if (headingElems.length === 0) return null
-  
+
   const headings = headingElems.map(elem => {
     let title = textValue(elem)
-    
+
     return {
       title: title,
       handle: handlify(title),
@@ -56,10 +56,10 @@ exports.pagetree = function(node, file) {
     }
   })
 
-  return h('nav.pagetree.content', [
-    headings.map(
-      heading => h(`li.level-${heading.level}`, [
-        h('a', { href: `#${heading.handle}`}, heading.title)
+  return h('nav.pagetree', [
+    headings.map(heading =>
+      h(`li.level-${heading.level}`, [
+        h('a', { href: `#${heading.handle}` }, heading.title)
       ])
     )
   ])

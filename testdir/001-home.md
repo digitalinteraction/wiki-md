@@ -1,5 +1,5 @@
 ---
-title: Our wiki
+title: Overview
 ---
 
 # Home
