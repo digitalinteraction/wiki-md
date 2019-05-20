@@ -49,7 +49,7 @@ exports.generate = async function(argv) {
 
   let matches = await glob(`**/*.md`, {
     cwd: infile('.'),
-    ignore: ['**/node_modules/**', `**/${outdir}/**`]
+    ignore: ['**/node_modules/**', `**/${outdir}/**`, `**/README.md`]
   })
 
   stopwatch.record('#glob')
