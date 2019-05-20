@@ -1,6 +1,5 @@
 const yargs = require('yargs')
-const ms = require('ms')
-const { red, green } = require('chalk')
+const { red } = require('chalk')
 const { generate } = require('./generator')
 
 yargs
@@ -40,12 +39,12 @@ yargs
   })
   .option('verbose', {
     type: 'boolean',
-    describe: 'Whether to describe whats happending',
+    describe: 'Whether to describe whats happening',
     default: process.env.NODE_ENV === 'development'
   })
   .command(
     '$0 [indir] [outdir]',
-    'asdasdas',
+    'Generate a site from local markdown files',
     yargs =>
       yargs
         .positional('indir', {

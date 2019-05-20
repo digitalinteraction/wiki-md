@@ -4,8 +4,13 @@ Generate a wiki from structure markdown files.
 
 ## Usage
 
-```bash
+This cli is designed to be run inside a docker container
 
+```bash
+docker run -it --rm \
+  -v `pwd`/your_pages_directory:/pages \
+  -v `pwd`/your_output_directory:/dist \
+  openlab/wiki-md --theme-color="#4b8aee"
 ```
 
 ## Development
@@ -36,6 +41,10 @@ npm run dev -s --
 
 # Output cli help
 npm run dev -s -- --help
+
+# Run a http server to serve files
+# -> Run in a new terminal tab
+npx http-server
 ```
 
 ### Irregular use
