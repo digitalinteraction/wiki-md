@@ -1,0 +1,10 @@
+#
+# Ignore files from docker operations
+#
+
+node_modules
+coverage
+*.env
+.DS_Store
+dist
+testdir

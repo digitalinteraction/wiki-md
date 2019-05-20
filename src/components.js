@@ -12,7 +12,7 @@ const {
 
 const headerTags = ['h2', 'h3', 'h4', 'h5', 'h6']
 
-exports.sitetree = function(currentFile, files) {
+exports.sitetree = function(files) {
   let root = new VNode('pages')
 
   for (let file of files) {
@@ -20,16 +20,18 @@ exports.sitetree = function(currentFile, files) {
       new VNode(file.outFile, {
         title: namePage(file),
         href: file.outFile,
-        activeClass:
-          file.inputFile === currentFile.inputFile ? '.is-active' : ''
+        file: file
       })
     )
   }
 
+  const nameNode = node => (node.value ? node.value.file.inputFile : node.name)
+  root.sort((a, b) => nameNode(a) > nameNode(b))
+
   let menu = root.map((node, childResults) => {
     if (node.value) {
-      let { href, title, activeClass } = node.value
-      return h('li', [h(`a${activeClass}`, { href }, title || href)])
+      let { href, title } = node.value
+      return h('li', [h(`a`, { href }, title || href)])
     } else {
       return h('li', [
         h('p.menu-label', casex(node.name, 'Ca Se')),

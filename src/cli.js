@@ -1,143 +1,7 @@
-const fs = require('fs')
-const { promisify } = require('util')
-const { join, dirname } = require('path')
-
-const Sass = require('sass')
 const yargs = require('yargs')
-const matter = require('gray-matter')
-const { red } = require('chalk')
-
-const glob = promisify(require('glob'))
-const writeFile = promisify(fs.writeFile)
-const readFile = promisify(fs.readFile)
-const mkdir = promisify(fs.mkdir)
-
-const unified = require('unified')
-const parseMarkdown = require('remark-parse')
-const mdToHtml = require('remark-rehype')
-const toHtmlString = require('rehype-stringify')
-const wrapInHtmlDoc = require('rehype-document')
-
-const plugin = require('./plugins')
-// const component = require('./components')
-
-async function renderSass(inputFile, primary, primaryInvert) {
-  let contents = await readFile(inputFile, 'utf8')
-  let variables = `$primary: ${primary}\n$primary-invert: ${primaryInvert}\n`
-
-  const options = {
-    data: variables + contents,
-    indentedSyntax: true,
-    includePaths: [join(__dirname, '../node_modules')],
-    outputStyle: 'compressed'
-  }
-
-  return promisify(Sass.render)(options)
-}
-
-async function generate(argv) {
-  // let start = argv.indir === '.' ? '' : argv.indir
-
-  const {
-    indexFile,
-    themeColor,
-    themeInvert,
-    indir,
-    outdir,
-    siteTitle,
-    basePath
-    // ownerName,
-    // ownerLink,
-    // compress
-  } = argv
-
-  const infile = file => join(process.cwd(), indir, file)
-  const outfile = file => join(process.cwd(), outdir, file)
-
-  let matches = await glob(`**/*.md`, {
-    cwd: infile('.'),
-    ignore: ['**/node_modules/**', `**/${outdir}/**`]
-  })
-
-  matches.sort()
-
-  let sass = await renderSass(
-    join(__dirname, 'theme.sass'),
-    themeColor,
-    themeInvert
-  )
-
-  await writeFile(outfile('theme.css'), sass.css)
-
-  await writeFile(
-    outfile('logic.js'),
-    await readFile(join(__dirname, 'logic.js'))
-  )
-
-  let files = []
-  let indexPageRegex = new RegExp(`${indexFile}\\.md`)
-  let allOutDirs = new Set()
-
-  await Promise.all(
-    matches.map(async match => {
-      let data = await readFile(infile(match), 'utf8')
-
-      let targetFile = match
-        .replace(/^\d+-/, '')
-        .replace(indexPageRegex, 'index.md')
-        .replace(/\.md$/, '.html')
-
-      files.push({
-        inputFile: match,
-        outFile: targetFile,
-        ...matter(data)
-      })
-
-      allOutDirs.add(outfile(dirname(match)))
-    })
-  )
-
-  // console.log(files.map(f => f.isEmpty !== false))
-
-  // Filter out empty files
-  // files = files.filter(file => file.isEmpty === false)
-
-  const markdownProcessor = unified()
-    .use(parseMarkdown)
-    .use(mdToHtml)
-    .use(plugin.injectPageStructure, { ...argv, files })
-    .use(wrapInHtmlDoc, {
-      title: siteTitle,
-      css: [join(basePath, 'theme.css')],
-      js: [join(basePath, 'logic.js')],
-      link: [{ rel: 'icon', href: join(basePath, 'favicon.png') }]
-    })
-    .use(plugin.updateDocumentTitle, { ...argv })
-    .use(plugin.addBaseTag, { ...argv })
-    .use(plugin.identifyTitles)
-    .use(toHtmlString)
-
-  await Promise.all(
-    files.map(async file => {
-      let result = await markdownProcessor.process({
-        ...file,
-        contents: file.content
-      })
-
-      file.html = result
-    })
-  )
-
-  await Promise.all(
-    Array.from(allOutDirs).map(directory =>
-      mkdir(directory, { recursive: true })
-    )
-  )
-
-  await Promise.all(
-    files.map(file => writeFile(outfile(file.outFile), file.html))
-  )
-}
+const ms = require('ms')
+const { red, green } = require('chalk')
+const { generate } = require('./generator')
 
 yargs
   .help('h')
@@ -167,12 +31,17 @@ yargs
     default: '/'
   })
   .option('owner-name', {
-    describe: '',
+    describe: 'The name of the owner of the site',
     default: 'Open Lab'
   })
   .option('owner-link', {
-    describe: '',
+    describe: 'The link to the owner of the site',
     default: 'https://openlab.ncl.ac.uk'
+  })
+  .option('verbose', {
+    type: 'boolean',
+    describe: 'Whether to describe whats happending',
+    default: process.env.NODE_ENV === 'development'
   })
   .command(
     '$0 [indir] [outdir]',
@@ -193,11 +62,8 @@ yargs
       try {
         await generate(argv)
       } catch (error) {
-        if (process.env.NODE_ENV === 'development') {
-          console.log(error)
-        } else {
-          console.log(red('𐄂'), error.message)
-        }
+        if (argv.verbose) console.log(error)
+        else console.log(red('𐄂'), error.message)
       }
     }
   )

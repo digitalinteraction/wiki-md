@@ -1,5 +1,32 @@
-const { basename } = require('path')
+//
+// General utilities to be used across the project
+//
+
+const fs = require('fs')
+const { promisify } = require('util')
+const { basename, join } = require('path')
+
 const casex = require('casex')
+const Sass = require('sass')
+const ms = require('ms')
+
+exports.writeFile = promisify(fs.writeFile)
+exports.readFile = promisify(fs.readFile)
+exports.mkdir = promisify(fs.mkdir)
+
+exports.ensureDir = function(path) {
+  let stats
+
+  try {
+    stats = fs.statSync(path)
+  } catch (error) {
+    return exports.mkdir(path, { recursive: true })
+  }
+
+  if (!stats || !stats.isDirectory()) {
+    throw new Error(`'${path}' exists and isn't a directory`)
+  }
+}
 
 exports.findHastnode = function(node, predicate) {
   if (!node.children) return null
@@ -35,7 +62,7 @@ exports.textValue = function(elem) {
   return elem.children.map(n => (n.type === 'text' ? n.value : '')).join('')
 }
 
-const trimSlashes = str => str.replace(/^\/+/, '').replace(/\/+$/, '')
+exports.trimSlashes = str => str.replace(/^\/+/, '').replace(/\/+$/, '')
 
 exports.VNode = class {
   constructor(name, value) {
@@ -50,7 +77,8 @@ exports.VNode = class {
     })
   }
   addChild(child) {
-    let segments = trimSlashes(child.name)
+    let segments = exports
+      .trimSlashes(child.name)
       .split('/')
       .filter(str => str !== '')
 
@@ -75,6 +103,14 @@ exports.VNode = class {
     child.parent = parent
   }
 
+  sort(comparator) {
+    this.children.sort(comparator)
+
+    for (let child of this.children) {
+      child.sort(comparator)
+    }
+  }
+
   map(lambda) {
     let childResults = []
     for (let child of this.children) {
@@ -90,4 +126,49 @@ exports.namePage = function(file) {
     file.data.title ||
     casex(basename(file.outFile).replace('.html', ''), 'Ca Se')
   )
+}
+
+exports.renderSass = async function(inputFile, primary, primaryInvert) {
+  let contents = await exports.readFile(inputFile, 'utf8')
+  let variables = `$primary: ${primary}\n$primary-invert: ${primaryInvert}\n`
+
+  const options = {
+    data: variables + contents,
+    indentedSyntax: true,
+    includePaths: [join(__dirname, '../node_modules')],
+    outputStyle: 'compressed'
+  }
+
+  return promisify(Sass.render)(options)
+}
+
+exports.timeLamda = async function(block) {
+  let startTime = Date.now()
+  await block()
+  return Date.now() - startTime
+}
+
+exports.StopWatch = class {
+  constructor(title) {
+    this.title = title
+    this.startedAt = Date.now()
+    this.timeseries = []
+  }
+
+  record(title) {
+    this.timeseries.push({ title, time: Date.now() })
+  }
+
+  output() {
+    console.log(`StopWatch: ${this.title}`)
+
+    let currentTime = this.startedAt
+
+    for (let item of this.timeseries) {
+      console.log(`- ${ms(item.time - currentTime)} ${item.title}`)
+      currentTime = item.time
+    }
+
+    console.log(`Total time: ${ms(currentTime - this.startedAt)}`)
+  }
 }

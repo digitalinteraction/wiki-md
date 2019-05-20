@@ -1,6 +1,8 @@
+//
+// This file has plugins for unified, each acts on different stages of the pipeline
+//
+
 const h = require('hastscript')
-const casex = require('casex')
-const { basename, extname } = require('path')
 
 const npmPackage = require('../package.json')
 const {
@@ -13,21 +15,23 @@ const {
 const component = require('./components')
 
 exports.injectPageStructure = options => (node, file) => {
-  const { siteTitle, ownerLink, ownerName, basePath, files } = options
+  const { siteTitle, ownerLink, ownerName, basePath, sitetree } = options
 
   const pageContents = [h('.content', node.children)]
 
-  const sitetree = component.sitetree(file, files)
   const pagetree = component.pagetree(node, file)
 
   if (sitetree) pageContents.unshift(sitetree)
   if (pagetree) pageContents.push(pagetree)
 
-  // <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-  //   <span aria-hidden="true"></span>
-  //   <span aria-hidden="true"></span>
-  //   <span aria-hidden="true"></span>
-  // </a>
+  if (sitetree) {
+    let anchors = findAllHastnodes(sitetree, elem => elem.tagName === 'a')
+
+    for (let anchor of anchors) {
+      anchor.properties.class =
+        anchor.properties.href === file.outFile ? 'is-active' : ''
+    }
+  }
 
   node.children = [
     h('nav.navbar.is-primary.has-shadow', [
