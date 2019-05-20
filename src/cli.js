@@ -59,6 +59,8 @@ async function generate(argv) {
     ignore: ['**/node_modules/**', `**/${outdir}/**`]
   })
 
+  matches.sort()
+
   let sass = await renderSass(
     join(__dirname, 'theme.sass'),
     themeColor,
