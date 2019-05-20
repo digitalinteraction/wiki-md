@@ -38,7 +38,7 @@ exports.injectPageStructure = options => (node, file) => {
       h('.container', [
         h('.navbar-brand', [
           h('a.navbar-item', { href: basePath }, siteTitle),
-          h('button.navbar-burger burger', [h('span'), h('span'), h('span')])
+          h('a.navbar-burger burger', [h('span'), h('span'), h('span')])
         ])
       ])
     ]),
