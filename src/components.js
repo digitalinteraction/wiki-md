@@ -1,3 +1,5 @@
+const { join } = require('path')
+
 const h = require('hastscript')
 const casex = require('casex')
 const {
@@ -12,7 +14,7 @@ const {
 
 const headerTags = ['h2', 'h3', 'h4', 'h5', 'h6']
 
-exports.sitetree = function(files) {
+exports.sitetree = function(files, basePath) {
   let root = new VNode('pages')
 
   for (let file of files) {
@@ -30,8 +32,11 @@ exports.sitetree = function(files) {
 
   let menu = root.map((node, childResults) => {
     if (node.value) {
-      let { href, title } = node.value
-      return h('li', [h(`a`, { href }, title || href)])
+      const attrs = {
+        href: join(basePath, node.value.href)
+      }
+
+      return h('li', [h(`a`, attrs, node.value.title)])
     } else {
       return h('li', [
         h('p.menu-label', casex(node.name, 'Ca Se')),

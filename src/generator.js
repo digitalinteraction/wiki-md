@@ -97,7 +97,7 @@ exports.generate = async function(argv) {
 
   stopwatch.record('#readPages')
 
-  const sitetree = component.sitetree(files)
+  const sitetree = component.sitetree(files, argv.basePath)
 
   const markdownProcessor = unified()
     .use(parseMarkdown)
@@ -110,7 +110,6 @@ exports.generate = async function(argv) {
       link: [{ rel: 'icon', href: join(basePath, 'favicon.png') }]
     })
     .use(plugin.updateDocumentTitle, { ...argv })
-    .use(plugin.addBaseTag, { ...argv })
     .use(plugin.identifyTitles)
     .use(toHtmlString)
 
