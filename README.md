@@ -53,7 +53,9 @@ These are commands you might need to run but probably won't, also in no particul
 
 ```bash
 # Build the docker image
-docker build -t openlab/wiki-md .
+VERSION=0.2.0
+docker build -t openlab/wiki-md:$VERSION .
+docker push openlab/wiki-md:$VERSION
 
 # Lint the source code
 # -> Uses ESLint to check for common errors
