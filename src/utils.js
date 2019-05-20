@@ -8,6 +8,7 @@ const { basename, join } = require('path')
 
 const casex = require('casex')
 const Sass = require('sass')
+const Fiber = require('fibers')
 const ms = require('ms')
 
 exports.writeFile = promisify(fs.writeFile)
@@ -136,7 +137,8 @@ exports.renderSass = async function(inputFile, primary, primaryInvert) {
     data: variables + contents,
     indentedSyntax: true,
     includePaths: [join(__dirname, '../node_modules')],
-    outputStyle: 'compressed'
+    outputStyle: 'compressed',
+    fiber: Fiber
   }
 
   return promisify(Sass.render)(options)
