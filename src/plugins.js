@@ -85,7 +85,7 @@ exports.updateDocumentTitle = ({ siteTitle = 'Wiki' }) => (node, file) => {
 exports.addBaseTag = ({ basePath }) => (node, filename) => {
   const headElem = findHastnode(node, n => n.tagName === 'head')
 
-  if (!headElem || basePath === '/') return
+  if (!headElem) return
 
   headElem.children.push(h('base', { href: basePath }))
 }
