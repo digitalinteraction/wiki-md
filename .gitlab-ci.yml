@@ -1,0 +1,24 @@
+#
+# A GitLab CI file to build a docker image on push when the commit is tagged
+# ... Then push it to dockerhub using credentials stored in https://vault.openlab.dev
+# NOTE - Tags aren't pushed by default, you can `git push --tags` each time
+#        or `git config --global push.followTags true`
+#
+
+services:
+  - docker:dind
+
+variables:
+  IMAGE_NAME: 'openlab/wiki-md'
+
+build:
+  image: robbj/ci:vault-1.0.0
+  tags:
+    - dind
+  only:
+    - tags
+  script:
+    - sh /vault-docker-login.sh
+    - IMAGE=$IMAGE_NAME:`echo $CI_COMMIT_TAG | sed 's/^v//'`
+    - docker build -t $IMAGE .
+    - docker push $IMAGE
