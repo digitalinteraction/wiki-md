@@ -2,6 +2,8 @@
 FROM node:10-alpine
 WORKDIR /app
 
+RUN apk add --no-cache openssh-client
+
 COPY ["package*.json", "/app/"]
 ENV NODE_ENV production
 RUN npm ci &> /dev/null
