@@ -14,8 +14,18 @@ const {
 } = require('./utils')
 const component = require('./components')
 
+// Wrap any <table> elemenets in an array with a wrapper
+function wrapTables(children, predicate) {
+  for (let i in children) {
+    if (children[i].tagName !== 'table') continue
+    children[i] = h('.overflow-wrapper', [children[i]])
+  }
+}
+
 exports.injectPageStructure = options => (node, file) => {
   const { siteTitle, ownerLink, ownerName, basePath, sitetree } = options
+
+  wrapTables(node.children)
 
   const pageContents = [h('.content', node.children)]
 
