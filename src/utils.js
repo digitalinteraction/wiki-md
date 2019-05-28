@@ -122,7 +122,7 @@ exports.VNode = class {
   }
 }
 
-exports.namePage = function(file) {
+exports.generatePageName = function(file) {
   return (
     file.data.title ||
     casex(basename(file.outFile).replace('.html', ''), 'Ca Se')
@@ -173,4 +173,21 @@ exports.StopWatch = class {
 
     console.log(`Total time: ${ms(currentTime - this.startedAt)}`)
   }
+}
+
+exports.generateOutputPath = function(inputPath, indexFile) {
+  let parts = inputPath.split('/')
+
+  for (let i in parts) {
+    parts[i] = parts[i].replace(/^\d+-/, '')
+  }
+
+  return parts
+    .join('/')
+    .replace(new RegExp(`${indexFile}\\.md$`), 'index.md')
+    .replace(/\.md$/, '.html')
+}
+
+exports.generateOutputHref = function(outputPath) {
+  return outputPath.replace(/\.html$/, '').replace(/index$/, '/')
 }

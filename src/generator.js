@@ -23,7 +23,8 @@ const {
   writeFile,
   ensureDir,
   trimSlashes,
-  StopWatch
+  StopWatch,
+  generateOutputPath
 } = require('./utils')
 
 exports.generate = async function(argv) {
@@ -73,7 +74,7 @@ exports.generate = async function(argv) {
   stopwatch.record('#writeAssets')
 
   let files = []
-  let indexPageRegex = new RegExp(`${indexFile}\\.md`)
+
   let allOutDirs = new Set()
 
   // Load the front matter from each file
@@ -81,14 +82,9 @@ exports.generate = async function(argv) {
     matches.map(async match => {
       let data = await readFile(infile(match), 'utf8')
 
-      let targetFile = match
-        .replace(/^\d+-/, '')
-        .replace(indexPageRegex, 'index.md')
-        .replace(/\.md$/, '.html')
-
       files.push({
         inputFile: match,
-        outFile: targetFile,
+        outFile: generateOutputPath(match, indexFile),
         ...matter(data)
       })
 

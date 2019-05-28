@@ -10,7 +10,7 @@ const {
   findAllHastnodes,
   handlify,
   textValue,
-  namePage
+  generatePageName
 } = require('./utils')
 const component = require('./components')
 
@@ -85,7 +85,7 @@ exports.identifyTitles = () => (node, file) => {
 exports.updateDocumentTitle = ({ siteTitle = 'Wiki' }) => (node, file) => {
   const titleElem = findHastnode(node, n => n.tagName === 'title')
 
-  let pageTitle = namePage(file)
+  let pageTitle = generatePageName(file)
 
   if (titleElem && titleElem.children[0]) {
     titleElem.children[0].value = `${pageTitle} | ${siteTitle}`

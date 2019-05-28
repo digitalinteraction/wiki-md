@@ -11,7 +11,8 @@ const {
   handlify,
   textValue,
   VNode,
-  namePage
+  generatePageName,
+  generateOutputHref
 } = require('./utils')
 
 // ...
@@ -24,8 +25,8 @@ exports.sitetree = function(files, basePath) {
   for (let file of files) {
     root.addChild(
       new VNode(file.outFile, {
-        title: namePage(file),
-        href: file.outFile,
+        title: generatePageName(file),
+        href: generateOutputHref(file.outFile),
         file: file
       })
     )
