@@ -1,3 +1,9 @@
+#!/usr/bin/env node
+
+//
+// CLI entrypoint
+//
+
 const yargs = require('yargs')
 const { red } = require('chalk')
 const { generate } = require('./generator')
@@ -20,10 +26,6 @@ yargs
   .option('theme-invert', {
     describe: 'The inverse theme color, something contrasting themeColor',
     default: '#ffffff'
-  })
-  .option('compress', {
-    describe: 'Whether to compress the output',
-    default: false
   })
   .option('base-path', {
     describe: 'The base directory, if served in a folder',

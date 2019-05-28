@@ -1,3 +1,7 @@
+//
+// HTML components ~ reusable blocks for rendering
+//
+
 const { join } = require('path')
 
 const h = require('hastscript')

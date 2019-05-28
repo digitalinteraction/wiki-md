@@ -1,3 +1,7 @@
+//
+// Logic for generating a website from a structured set of markdown files
+//
+
 const { promisify } = require('util')
 const { join, dirname } = require('path')
 
@@ -23,8 +27,6 @@ const {
 } = require('./utils')
 
 exports.generate = async function(argv) {
-  // let start = argv.indir === '.' ? '' : argv.indir
-
   // Ensure the basePath is wrapped in slashes
   if (argv.basePath !== '/') argv.basePath = `/${trimSlashes(argv.basePath)}/`
 
@@ -38,8 +40,7 @@ exports.generate = async function(argv) {
     basePath,
     verbose
     // ownerName,
-    // ownerLink,
-    // compress
+    // ownerLink
   } = argv
 
   const stopwatch = new StopWatch('#generate')
@@ -116,7 +117,7 @@ exports.generate = async function(argv) {
   // Render each file
   await Promise.all(
     files.map(file => {
-      // gray-matter sets .content (singular), unified needs .contents (plural)
+      // 'gray-matter' sets .content (singular), 'unified' needs .contents (plural)
       file.contents = file.content
 
       return markdownProcessor.process(file).then(html => {
@@ -141,7 +142,6 @@ exports.generate = async function(argv) {
 
   stopwatch.record('#writePages')
 
-  if (verbose) {
-    stopwatch.output()
-  }
+  // If in verbose mode, output the timings report
+  if (verbose) stopwatch.output()
 }
