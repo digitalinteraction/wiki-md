@@ -24,7 +24,8 @@ const {
   ensureDir,
   trimSlashes,
   StopWatch,
-  generateOutputPath
+  generateOutputPath,
+  WikiFile
 } = require('./utils')
 
 exports.generate = async function(argv) {
@@ -73,26 +74,24 @@ exports.generate = async function(argv) {
 
   stopwatch.record('#writeAssets')
 
+  /** @type Array<WikiFile> */
   let files = []
 
   let allOutDirs = new Set()
 
   // Load the front matter from each file
   await Promise.all(
-    matches.map(async match => {
-      let data = await readFile(infile(match), 'utf8')
+    matches.map(async inputFile => {
+      let { data, content } = matter(await readFile(infile(inputFile), 'utf8'))
 
-      let frontmatter = matter(data)
+      if (data.draft === true) return
 
-      if (frontmatter.draft === true) return
+      const outFile = generateOutputPath(inputFile, indexFile)
+      let file = new WikiFile(inputFile, outFile, data, content)
 
-      files.push({
-        inputFile: match,
-        outFile: generateOutputPath(match, indexFile),
-        ...frontmatter
-      })
+      files.push(file)
 
-      allOutDirs.add(outfile(dirname(match)))
+      allOutDirs.add(outfile(dirname(inputFile)))
     })
   )
 
@@ -116,14 +115,11 @@ exports.generate = async function(argv) {
 
   // Render each file
   await Promise.all(
-    files.map(file => {
-      // 'gray-matter' sets .content (singular), 'unified' needs .contents (plural)
-      file.contents = file.content
-
-      return markdownProcessor.process(file).then(html => {
+    files.map(file =>
+      markdownProcessor.process(file).then(html => {
         file.html = html
       })
-    })
+    )
   )
 
   stopwatch.record('#renderPages')

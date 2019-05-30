@@ -191,3 +191,13 @@ exports.generateOutputPath = function(inputPath, indexFile) {
 exports.generateOutputHref = function(outputPath) {
   return outputPath.replace(/\.html$/, '').replace(/index$/, '/')
 }
+
+exports.WikiFile = class {
+  constructor(inputFile, outFile, data, contents) {
+    this.inputFile = inputFile
+    this.outFile = outFile
+    this.data = data
+    this.contents = contents
+    this.html = ''
+  }
+}
