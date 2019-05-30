@@ -82,10 +82,14 @@ exports.generate = async function(argv) {
     matches.map(async match => {
       let data = await readFile(infile(match), 'utf8')
 
+      let frontmatter = matter(data)
+
+      if (frontmatter.draft === true) return
+
       files.push({
         inputFile: match,
         outFile: generateOutputPath(match, indexFile),
-        ...matter(data)
+        ...frontmatter
       })
 
       allOutDirs.add(outfile(dirname(match)))
