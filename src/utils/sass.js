@@ -12,7 +12,7 @@ exports.renderSass = async function(inputFile, primary, primaryInvert) {
   const options = {
     data: variables + contents,
     indentedSyntax: true,
-    includePaths: [join(__dirname, '../node_modules')],
+    includePaths: [join(__dirname, '../../node_modules')],
     outputStyle: 'compressed',
     fiber: Fiber
   }

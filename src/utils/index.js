@@ -2,7 +2,6 @@
 // General utilities to be used across the project
 //
 
-const fs = require('fs')
 const { basename } = require('path')
 
 const casex = require('casex')
@@ -16,6 +15,7 @@ const casex = require('casex')
 // const { renderSass } = require('./sass')
 
 module.exports = {
+  ...require('./paths'),
   ...require('./promisified'),
   ...require('./hast'),
   ...require('./v-node'),
@@ -28,14 +28,14 @@ module.exports = {
 //
 // Move to WikiFile ?
 //
-exports.generatePageName = function(file) {
+module.exports.generatePageName = function(file) {
   return (
     file.data.title ||
     casex(basename(file.outFile).replace('.html', ''), 'Ca Se')
   )
 }
 
-exports.generateOutputPath = function(inputPath, indexFile) {
+module.exports.generateOutputPath = function(inputPath, indexFile) {
   let parts = inputPath.split('/')
 
   for (let i in parts) {
@@ -48,6 +48,6 @@ exports.generateOutputPath = function(inputPath, indexFile) {
     .replace(/\.md$/, '.html')
 }
 
-exports.generateOutputHref = function(outputPath) {
+module.exports.generateOutputHref = function(outputPath) {
   return outputPath.replace(/\.html$/, '').replace(/index$/, '/')
 }

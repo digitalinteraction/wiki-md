@@ -1,4 +1,5 @@
 const fs = require('fs')
+const { mkdir } = require('./promisified')
 
 function ensureDir(path) {
   let stats
@@ -6,7 +7,7 @@ function ensureDir(path) {
   try {
     stats = fs.statSync(path)
   } catch (error) {
-    return exports.mkdir(path, { recursive: true })
+    return mkdir(path, { recursive: true })
   }
 
   if (!stats || !stats.isDirectory()) {
