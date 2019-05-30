@@ -29,24 +29,24 @@ exports.ensureDir = function(path) {
   }
 }
 
-exports.findHastnode = function(node, predicate) {
+exports.findHastNode = function(node, predicate) {
   if (!node.children) return null
   for (let child of node.children) {
     if (predicate(child)) return child
 
-    const nested = exports.findHastnode(child, predicate)
+    const nested = exports.findHastNode(child, predicate)
     if (nested) return nested
   }
   return null
 }
 
-exports.findAllHastnodes = function(node, predicate, result = []) {
+exports.findAllHastNodes = function(node, predicate, result = []) {
   if (!node.children) return result
 
   for (let child of node.children) {
     if (predicate(child)) result.push(child)
 
-    result.push(...exports.findAllHastnodes(child, predicate))
+    result.push(...exports.findAllHastNodes(child, predicate))
   }
 
   return result

@@ -6,8 +6,8 @@ const h = require('hastscript')
 
 const npmPackage = require('../package.json')
 const {
-  findHastnode,
-  findAllHastnodes,
+  findHastNode,
+  findAllHastNodes,
   handlify,
   textValue,
   generatePageName
@@ -35,7 +35,7 @@ exports.injectPageStructure = options => (node, file) => {
   if (pagetree) pageContents.push(pagetree)
 
   if (sitetree) {
-    let anchors = findAllHastnodes(sitetree, elem => elem.tagName === 'a')
+    let anchors = findAllHastNodes(sitetree, elem => elem.tagName === 'a')
 
     for (let anchor of anchors) {
       anchor.properties.class =
@@ -75,7 +75,7 @@ exports.injectPageStructure = options => (node, file) => {
 }
 
 exports.identifyTitles = () => (node, file) => {
-  let headings = findAllHastnodes(node, n => /^h\d$/.test(n.tagName))
+  let headings = findAllHastNodes(node, n => /^h\d$/.test(n.tagName))
 
   for (let elem of headings) {
     elem.properties.id = handlify(textValue(elem))
@@ -83,7 +83,7 @@ exports.identifyTitles = () => (node, file) => {
 }
 
 exports.updateDocumentTitle = ({ siteTitle = 'Wiki' }) => (node, file) => {
-  const titleElem = findHastnode(node, n => n.tagName === 'title')
+  const titleElem = findHastNode(node, n => n.tagName === 'title')
 
   let pageTitle = generatePageName(file)
 
@@ -93,7 +93,7 @@ exports.updateDocumentTitle = ({ siteTitle = 'Wiki' }) => (node, file) => {
 }
 
 exports.addBaseTag = ({ basePath }) => (node, filename) => {
-  const headElem = findHastnode(node, n => n.tagName === 'head')
+  const headElem = findHastNode(node, n => n.tagName === 'head')
 
   if (!headElem) return
 

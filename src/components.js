@@ -7,7 +7,7 @@ const { join } = require('path')
 const h = require('hastscript')
 const casex = require('casex')
 const {
-  findAllHastnodes,
+  findAllHastNodes,
   handlify,
   textValue,
   VNode,
@@ -54,7 +54,7 @@ exports.sitetree = function(files, basePath) {
 }
 
 exports.pagetree = function(node, file) {
-  let headingElems = findAllHastnodes(node, n => headerTags.includes(n.tagName))
+  let headingElems = findAllHastNodes(node, n => headerTags.includes(n.tagName))
 
   if (headingElems.length === 0) return null
 
