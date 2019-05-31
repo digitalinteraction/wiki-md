@@ -3,29 +3,17 @@
 //
 
 const h = require('hastscript')
+const hastQuery = require('hast-util-select')
+const hastToText = require('hast-util-to-text')
 
 const npmPackage = require('../package.json')
-const {
-  findHastNode,
-  findAllHastNodes,
-  handlify,
-  textValue,
-  generatePageName
-} = require('./utils')
+const { handlify, generatePageName, wrapTables } = require('./utils')
 const component = require('./components')
 
-// Wrap any <table> elemenets in an array with a wrapper
-function wrapTables(children, predicate) {
-  for (let i in children) {
-    if (children[i].tagName !== 'table') continue
-    children[i] = h('.overflow-wrapper', [children[i]])
-  }
-}
-
-exports.injectPageStructure = options => (node, file) => {
+const injectPageStructure = options => (node, file) => {
   const { siteTitle, ownerLink, ownerName, basePath, sitetree } = options
 
-  wrapTables(node.children)
+  wrapTables(node)
 
   const pageContents = [h('.content', node.children)]
 
@@ -35,11 +23,13 @@ exports.injectPageStructure = options => (node, file) => {
   if (pagetree) pageContents.push(pagetree)
 
   if (sitetree) {
-    let anchors = findAllHastNodes(sitetree, elem => elem.tagName === 'a')
+    let anchors = hastQuery.selectAll('a', sitetree)
 
     for (let anchor of anchors) {
-      anchor.properties.class =
+      anchor.properties.className = anchor.properties.className || []
+      anchor.properties.className.push(
         anchor.properties.href === file.outFile ? 'is-active' : ''
+      )
     }
   }
 
@@ -74,16 +64,16 @@ exports.injectPageStructure = options => (node, file) => {
   ]
 }
 
-exports.identifyTitles = () => (node, file) => {
-  let headings = findAllHastNodes(node, n => /^h\d$/.test(n.tagName))
+const identifyTitles = () => node => {
+  let headings = hastQuery.selectAll('h1,h2,h3,h4,h5,h6', node)
 
   for (let elem of headings) {
-    elem.properties.id = handlify(textValue(elem))
+    elem.properties.id = handlify(hastToText(elem))
   }
 }
 
-exports.updateDocumentTitle = ({ siteTitle = 'Wiki' }) => (node, file) => {
-  const titleElem = findHastNode(node, n => n.tagName === 'title')
+const updateDocumentTitle = ({ siteTitle = 'Wiki' }) => (node, file) => {
+  const titleElem = hastQuery.select('title', node)
 
   let pageTitle = generatePageName(file)
 
@@ -92,10 +82,4 @@ exports.updateDocumentTitle = ({ siteTitle = 'Wiki' }) => (node, file) => {
   }
 }
 
-exports.addBaseTag = ({ basePath }) => (node, filename) => {
-  const headElem = findHastNode(node, n => n.tagName === 'head')
-
-  if (!headElem) return
-
-  headElem.children.push(h('base', { href: basePath }))
-}
+module.exports = { injectPageStructure, identifyTitles, updateDocumentTitle }
