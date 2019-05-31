@@ -1,10 +1,5 @@
-const Sass = require('sass')
-
 let { generateCss } = require('../sass')
 let { readFile, renderSass } = require('../promisified')
-
-// const renderMock =
-jest.mock('sass')
 
 jest.mock('../promisified')
 
@@ -16,7 +11,8 @@ describe('#renderSass', () => {
 
   it('should call Sass.render', async () => {
     await generateCss('some-path', '#fff', '#000')
-    expect(Sass.render).toBeCalledWith(
+
+    expect(renderSass).toBeCalledWith(
       expect.objectContaining({
         data: expect.any(String),
         indentedSyntax: true,
@@ -24,8 +20,7 @@ describe('#renderSass', () => {
           expect.stringMatching(/node_modules/)
         ]),
         outputStyle: 'compressed'
-      }),
-      expect.any(Function)
+      })
     )
   })
 })
