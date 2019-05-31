@@ -2,6 +2,20 @@
 
 Generate a wiki from structure markdown files.
 
+<!-- toc-head -->
+
+## Table of contents
+
+- [Usage](#usage)
+- [Development](#development)
+  - [Setup](#setup)
+  - [Regular use](#regular-use)
+  - [Irregular use](#irregular-use)
+  - [Testing](#testing)
+  - [Code formatting](#code-formatting)
+
+<!-- toc-tail -->
+
 ## Usage
 
 This cli is designed to be run inside a docker container
@@ -11,6 +25,39 @@ docker run -it --rm \
   -v `pwd`/your_pages_directory:/pages \
   -v `pwd`/your_output_directory:/dist \
   openlab/wiki-md --theme-color="#4b8aee"
+```
+
+Below is the cli `--help` output:
+
+```
+cli.js <indir> [outdir]
+
+Generate a site from local markdown files
+
+Commands:
+  cli.js generate <indir> [outdir]  Generate a site from local markdown files
+                                                                       [default]
+  cli.js serve <indir> [outdir]     Generate a site, serve it locally and
+                                    regenerate on changes
+
+Positionals:
+  indir   Where to recursively look for markdown files                  [string]
+  outdir  Where to put the generated html             [string] [default: "dist"]
+
+Options:
+  --version       Show version number                                  [boolean]
+  --site-title    The title of the site, used in the <title> elment
+                                                               [default: "Wiki"]
+  --index-file    What file to use to generate index.html files[default: "home"]
+  --theme-color   The primary theme color                   [default: "#23967F"]
+  --theme-invert  The inverse theme color, something contrasting themeColor
+                                                            [default: "#ffffff"]
+  --base-path     The base directory, if served in a folder       [default: "/"]
+  --owner-name    The name of the owner of the site        [default: "Open Lab"]
+  --owner-link    The link to the owner of the site
+                                          [default: "https://openlab.ncl.ac.uk"]
+  --verbose       Whether to describe whats happening [boolean] [default: false]
+  -h, --help      Show help                                            [boolean]
 ```
 
 ## Development
@@ -65,6 +112,24 @@ npm run lint
 # -> Uses prettier to automatically format code
 # -> This already happens automatically when you commit (see below)
 npm run prettier
+
+# Generate the table of contents for this readme
+npx md-toc -i
+```
+
+### Testing
+
+This repo uses [unit tests](https://en.wikipedia.org/wiki/Unit_testing) to ensure that everything is working correctly, guide development, avoid bad code and reduce defects.
+The [Jest](https://www.npmjs.com/package/jest) package is used to run unit tests.
+Tests are any file in `src/` that end with `.spec.js`, by convention they are inline with the source code,
+in a parallel folder called `__tests__`.
+
+```bash
+# Run the tests
+npm test -s
+
+# Generate code coverage
+npm run coverage -s
 ```
 
 ### Code formatting
