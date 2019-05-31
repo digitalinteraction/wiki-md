@@ -1,12 +1,15 @@
 # wiki-md
 
-Generate a wiki from structure markdown files.
+Quickly generate a wiki website from structured markdown files.
 
 <!-- toc-head -->
 
 ## Table of contents
 
 - [Usage](#usage)
+  - [GitLab CI usage](#gitlab-ci-usage)
+  - [NPM usage](#npm-usage)
+  - [Cli usage](#cli-usage)
 - [Development](#development)
   - [Setup](#setup)
   - [Regular use](#regular-use)
@@ -18,7 +21,13 @@ Generate a wiki from structure markdown files.
 
 ## Usage
 
-This cli is designed to be run inside a docker container
+This cli is designed to be run inside a docker container.
+
+The command below will:
+
+- Read in markdown files from `./your_pages_directory`
+- Write html files to `./your_output_directory`
+- Set the theme colour to `#4b8aee`
 
 ```bash
 docker run -it --rm \
@@ -26,6 +35,47 @@ docker run -it --rm \
   -v `pwd`/your_output_directory:/dist \
   openlab/wiki-md --theme-color="#4b8aee"
 ```
+
+### GitLab CI usage
+
+Below is an example of using `wiki-md` in a [GitLab CI] pipeline, it does a few things:
+
+- Runs command inside the `openlab/wiki-md` docker image
+- Offers customisation through pipeline variables
+- Deploys assets to a server via SCP
+  - Authenticated with an ssh key added via pipeline variables
+
+```yaml
+build_and_deploy:
+  image:
+    name: openlab/wiki-md:0.3.1
+    entrypoint: ['/bin/sh', '-c']
+  tags:
+    - docker
+  script:
+    - wiki-md . dist --theme-color="$THEME_COLOR" --site-title="SOPs"
+    - tar -czf dist.tar.gz dist
+    - echo "$SSH_SECRET" > deploy_key && chmod 600 deploy_key
+    - scp -o StrictHostKeyChecking=no -i deploy_key dist.tar.gz $DEPLOY_HOST:$DEPLOY_PATH/dist.tar.gz
+    - ssh -o StrictHostKeyChecking=no -i deploy_key $DEPLOY_HOST $DEPLOY_PATH/update.sh
+```
+
+### NPM usage
+
+If you want to experiment you can install the cli with [npm](https://www.npmjs.com/).
+
+```bash
+# Install it globally
+npm i -g @openlab/wiki-md
+
+# Use the cli
+wiki-md --help
+
+# For example...
+wiki-md pages dist --site-title="My wiki" --theme-color="#000000" --owner-name="Geoff" --owner-link="https://r0b.io" --verbose
+```
+
+### Cli usage
 
 Below is the cli `--help` output:
 
