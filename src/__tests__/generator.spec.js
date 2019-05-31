@@ -55,7 +55,7 @@ describe('#generate', () => {
       expect.anything()
     )
     expect(mkdir).toHaveBeenCalledWith(
-      expect.stringMatching('dist/project'),
+      expect.stringMatching('dist/projects'),
       expect.anything()
     )
 
