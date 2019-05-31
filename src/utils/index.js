@@ -45,7 +45,6 @@ function wrapTables(node) {
 module.exports = {
   ...require('./paths'),
   ...require('./promisified'),
-  ...require('./hast'),
   ...require('./v-node'),
   ...require('./stop-watch'),
   ...require('./wiki-file'),

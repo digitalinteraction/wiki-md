@@ -6,18 +6,14 @@ const { join } = require('path')
 
 const h = require('hastscript')
 const casex = require('casex')
+const hastQuery = require('hast-util-select')
+const hastToText = require('hast-util-to-text')
 const {
-  findAllHastNodes,
   handlify,
-  textValue,
   VNode,
   generatePageName,
   generateOutputHref
 } = require('./utils')
-
-// ...
-
-const headerTags = ['h2', 'h3', 'h4', 'h5', 'h6']
 
 exports.sitetree = function(files, basePath = '/') {
   let root = new VNode('pages')
@@ -53,18 +49,23 @@ exports.sitetree = function(files, basePath = '/') {
   return h('nav.sitetree.menu', menu.children)
 }
 
-exports.pagetree = function(node) {
-  let headingElems = findAllHastNodes(node, n => headerTags.includes(n.tagName))
+exports.pagetree = function(contentNode) {
+  // console.log(contentNode.children)
+  // let headingElems = contentNode.children.filter(
+  //   contentNode, n => headerTags.includes(n.tagName)
+  // )
 
-  if (headingElems.length === 0) return null
+  let headingNodes = hastQuery.selectAll('h2,h3,h4,h5,h6', contentNode)
 
-  const headings = headingElems.map(elem => {
-    let title = textValue(elem)
+  if (headingNodes.length === 0) return null
+
+  const headings = headingNodes.map(headingNode => {
+    let title = hastToText(headingNode)
 
     return {
       title: title,
       handle: handlify(title),
-      level: parseInt(elem.tagName.slice(1), 10)
+      level: parseInt(headingNode.tagName.slice(1), 10)
     }
   })
 

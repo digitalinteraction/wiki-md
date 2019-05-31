@@ -75,6 +75,6 @@ describe('#pagetree', () => {
     let result = pagetree(content)
     let [ol] = result.children
 
-    expect(ol.children[2].properties.className).toContain('level-3')
+    expect(ol.children[2].properties.className).toContain('level-2')
   })
 })
