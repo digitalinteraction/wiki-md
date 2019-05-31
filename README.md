@@ -197,4 +197,5 @@ and also ignores files using [.prettierignore](/.prettierignore).
 
 ---
 
-> This project was set up by [puggle](https://npm.im/puggle)
+> - The code at https://github.com/digitalinteraction/wiki-md is a mirror of https://openlab.ncl.ac.uk/gitlab/rob/wiki-md
+> - This project was set up by [puggle](https://npm.im/puggle)
