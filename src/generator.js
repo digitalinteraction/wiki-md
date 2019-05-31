@@ -2,12 +2,9 @@
 // Logic for generating a website from a structured set of markdown files
 //
 
-const { promisify } = require('util')
 const { join, dirname } = require('path')
 
 const matter = require('gray-matter')
-
-const glob = promisify(require('glob'))
 
 const unified = require('unified')
 const parseMarkdown = require('remark-parse')
@@ -18,7 +15,8 @@ const wrapInHtmlDoc = require('rehype-document')
 const plugin = require('./plugins')
 const component = require('./components')
 const {
-  renderSass,
+  glob,
+  generateCss,
   readFile,
   writeFile,
   ensureDir,
@@ -28,7 +26,7 @@ const {
   WikiFile
 } = require('./utils')
 
-exports.generate = async function(argv) {
+async function generate(argv) {
   // Ensure the basePath is wrapped in slashes
   if (argv.basePath !== '/') argv.basePath = `/${trimSlashes(argv.basePath)}/`
 
@@ -60,7 +58,7 @@ exports.generate = async function(argv) {
   // Read in the logic & theme files and ensure the output directory exists
   const [logicJs, sass] = await Promise.all([
     readFile(join(__dirname, 'logic.js')),
-    renderSass(join(__dirname, 'theme.sass'), themeColor, themeInvert),
+    generateCss(join(__dirname, 'theme.sass'), themeColor, themeInvert),
     ensureDir(outfile(''))
   ])
 
@@ -117,7 +115,7 @@ exports.generate = async function(argv) {
   await Promise.all(
     files.map(file =>
       markdownProcessor.process(file).then(html => {
-        file.html = html
+        file.html = html.toString()
       })
     )
   )
@@ -141,3 +139,5 @@ exports.generate = async function(argv) {
   // If in verbose mode, output the timings report
   if (verbose) stopwatch.output()
 }
+
+module.exports = { generate }

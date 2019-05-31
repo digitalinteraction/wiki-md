@@ -1,11 +1,9 @@
 const { join } = require('path')
-const { promisify } = require('util')
-const { readFile } = require('./promisified')
+const { readFile, renderSass } = require('./promisified')
 
-const Sass = require('sass')
 const Fiber = require('fibers')
 
-exports.renderSass = async function(inputFile, primary, primaryInvert) {
+async function generateCss(inputFile, primary, primaryInvert) {
   let contents = await readFile(inputFile, 'utf8')
   let variables = `$primary: ${primary}\n$primary-invert: ${primaryInvert}\n`
 
@@ -17,5 +15,7 @@ exports.renderSass = async function(inputFile, primary, primaryInvert) {
     fiber: Fiber
   }
 
-  return promisify(Sass.render)(options)
+  return renderSass(options)
 }
+
+module.exports = { generateCss }

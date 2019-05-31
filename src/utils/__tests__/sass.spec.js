@@ -1,7 +1,7 @@
 const Sass = require('sass')
 
-let { renderSass } = require('../sass')
-let { readFile } = require('../promisified')
+let { generateCss } = require('../sass')
+let { readFile, renderSass } = require('../promisified')
 
 // const renderMock =
 jest.mock('sass')
@@ -10,12 +10,12 @@ jest.mock('../promisified')
 
 describe('#renderSass', () => {
   beforeEach(() => {
-    Sass.render.mockImplementation((...args) => args.pop()(null, '_css_'))
-    readFile.mockImplementation(() => Promise.resolve('sass'))
+    readFile.mockResolvedValue('sass')
+    renderSass.mockResolvedValue('p{color:red}')
   })
 
   it('should call Sass.render', async () => {
-    await renderSass('some-path', '#fff', '#000')
+    await generateCss('some-path', '#fff', '#000')
     expect(Sass.render).toBeCalledWith(
       expect.objectContaining({
         data: expect.any(String),
