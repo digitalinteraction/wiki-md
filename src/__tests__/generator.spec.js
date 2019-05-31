@@ -1,16 +1,17 @@
 const { generate } = require('../generator')
 
-const { readFile, writeFile, mkdir, renderSass, glob } = require('../utils')
+const { readFile, writeFile, renderSass, glob, ensureDir } = require('../utils')
 
 jest.mock('../utils/stop-watch')
 jest.mock('../utils/promisified')
+jest.mock('../utils/files')
 jest.spyOn(global.console, 'log')
 
 describe('#generate', () => {
   beforeEach(() => {
     readFile.mockResolvedValue('')
     writeFile.mockResolvedValue(true)
-    mkdir.mockResolvedValue(true)
+    ensureDir.mockResolvedValue(true)
     renderSass.mockResolvedValue({ css: 'p{color:red}' })
     glob.mockResolvedValue([
       'home.md',
@@ -36,7 +37,7 @@ describe('#generate', () => {
 
     expect(readFile).toHaveBeenCalled()
     expect(writeFile).toHaveBeenCalled()
-    expect(mkdir).toHaveBeenCalled()
+    expect(ensureDir).toHaveBeenCalled()
 
     // Check the correct assets were added
     expect(writeFile).toHaveBeenCalledWith(
@@ -50,13 +51,9 @@ describe('#generate', () => {
     )
 
     // Check directories were created
-    expect(mkdir).toHaveBeenCalledWith(
-      expect.stringMatching('dist'),
-      expect.anything()
-    )
-    expect(mkdir).toHaveBeenCalledWith(
-      expect.stringMatching('dist/projects'),
-      expect.anything()
+    expect(ensureDir).toHaveBeenCalledWith(expect.stringMatching('dist'))
+    expect(ensureDir).toHaveBeenCalledWith(
+      expect.stringMatching('dist/projects')
     )
 
     // Check the correct files were made
