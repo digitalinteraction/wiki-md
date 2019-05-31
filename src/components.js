@@ -19,7 +19,7 @@ const {
 
 const headerTags = ['h2', 'h3', 'h4', 'h5', 'h6']
 
-exports.sitetree = function(files, basePath) {
+exports.sitetree = function(files, basePath = '/') {
   let root = new VNode('pages')
 
   for (let file of files) {
@@ -53,7 +53,7 @@ exports.sitetree = function(files, basePath) {
   return h('nav.sitetree.menu', menu.children)
 }
 
-exports.pagetree = function(node, file) {
+exports.pagetree = function(node) {
   let headingElems = findAllHastNodes(node, n => headerTags.includes(n.tagName))
 
   if (headingElems.length === 0) return null
@@ -69,10 +69,13 @@ exports.pagetree = function(node, file) {
   })
 
   return h('nav.pagetree', [
-    headings.map(heading =>
-      h(`li.level-${heading.level}`, [
-        h('a', { href: `#${heading.handle}` }, heading.title)
-      ])
+    h(
+      'ol',
+      headings.map(heading =>
+        h(`li.level-${heading.level}`, [
+          h('a', { href: `#${heading.handle}` }, heading.title)
+        ])
+      )
     )
   ])
 }

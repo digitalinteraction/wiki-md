@@ -7,7 +7,7 @@
   "author": "",
   "license": "MIT",
   "scripts": {
-    "coverage": "jest --coverage",
+    "coverage": "npx jest --coverage --collectCoverageFrom 'src/**/*'",
     "dev": "NODE_ENV=development node src/cli.js testdir/ --base-path=dist",
     "lint": "eslint src",
     "prettier": "prettier --write '**/*.{js,json,css,md,ts,tsx}'",
