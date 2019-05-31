@@ -9,4 +9,5 @@ ENV NODE_ENV production
 RUN npm ci &> /dev/null
 
 COPY src /app/src
+RUN ln -s /app/src/cli.js /usr/local/bin/wiki-md
 ENTRYPOINT [ "node", "src/cli.js", "../pages", "../dist" ]
