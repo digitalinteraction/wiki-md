@@ -50,12 +50,11 @@ exports.sitetree = function(files, basePath = '/') {
 }
 
 exports.pagetree = function(contentNode) {
-  // console.log(contentNode.children)
-  // let headingElems = contentNode.children.filter(
-  //   contentNode, n => headerTags.includes(n.tagName)
-  // )
+  const headerTags = ['h2', 'h3', 'h4', 'h5', 'h6']
 
-  let headingNodes = hastQuery.selectAll('h2,h3,h4,h5,h6', contentNode)
+  const headingNodes = contentNode.children.filter(n =>
+    headerTags.includes(n.tagName)
+  )
 
   if (headingNodes.length === 0) return null
 
