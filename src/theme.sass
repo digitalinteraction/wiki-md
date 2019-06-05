@@ -4,6 +4,13 @@ $title-weight: 900
 $menu-item-active-background-color: #1EA2AD
 $menu-nested-list-padding-left: 0.25em
 
+$size-1: 2.441em
+$size-2: 1.953em
+$size-3: 1.563em
+$size-4: 1.25em
+$size-5: 1em
+$size-6: 0.8em
+
 @import "bulma/sass/utilities/_all.sass"
 @import "bulma/sass/base/_all.sass"
 
@@ -62,8 +69,11 @@ body
     li > .menu-label
       margin-top: 1em
   
+  .menu
+    font-size: 0.9em
+  
   .menu-list a
-    padding-left: 0
+    padding-left: 0.25em
   
   .menu-list li ul
     margin-left: 0.25em
@@ -109,4 +119,3 @@ body
     max-width: 100%
     overflow-x: auto
     margin-bottom: 1em
-    
